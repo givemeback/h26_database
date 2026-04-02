@@ -1,0 +1,134 @@
+CREATE TABLE R (
+    A VARCHAR2(10),
+    B VARCHAR2(10),
+    C VARCHAR2(10));
+
+CREATE TABLE S (
+    C VARCHAR2(10),
+    D VARCHAR2(10),
+    E VARCHAR2(10));
+
+INSERT INTO R VALUES ('a1', 'b1', 'c1');
+INSERT INTO R VALUES ('a2', 'b1', 'c1');
+INSERT INTO R VALUES ('a3', 'b1', 'c2');
+INSERT INTO R VALUES ('a4', 'b2', 'c4');
+
+INSERT INTO S VALUES ('c1', 'd2', 'e1');
+INSERT INTO S VALUES ('c1', 'd1', 'e2');
+INSERT INTO S VALUES ('c2', 'd3', 'e3');
+INSERT INTO S VALUES ('c5', 'd3', 'e3');
+
+COMMIT;
+
+
+CREATE TABLE Book (
+    bookid    NUMBER PRIMARY KEY,      
+    bookname  VARCHAR2(100),           
+    publisher VARCHAR2(50),            
+    price     NUMBER);
+
+CREATE TABLE Customer (
+    custid    NUMBER PRIMARY KEY, 
+    name      VARCHAR2(40),           
+    address   VARCHAR2(100),          
+    phone     VARCHAR2(20));
+
+CREATE TABLE Orders (
+    orderid   NUMBER PRIMARY KEY, 
+    custid    NUMBER,  
+    bookid    NUMBER, 
+    saleprice NUMBER,                  
+    orderdate DATE);
+
+CREATE TABLE Cust_addr (
+    custid     NUMBER,           
+    addrid     NUMBER,           
+    address    VARCHAR2(100),    
+    phone      VARCHAR2(20),     
+    changedate DATE);
+
+INSERT INTO Cust_addr (custid, addrid, address, phone, changedate) 
+VALUES (1, 1, '서울 은평구 불광동', '010-1234-5678', TO_DATE('2024-03-10', 'YYYY-MM-DD'));
+
+INSERT INTO Cust_addr (custid, addrid, address, phone, changedate) 
+VALUES (1, 2, '서울 마포구 합정동', '010-1234-5678', TO_DATE('2025-07-20', 'YYYY-MM-DD'));
+
+INSERT INTO Cust_addr (custid, addrid, address, phone, changedate) 
+VALUES (2, 1, '경기 수원시 팔달구', '010-2345-6789', TO_DATE('2023-11-05', 'YYYY-MM-DD'));
+
+INSERT INTO Cust_addr (custid, addrid, address, phone, changedate) 
+VALUES (2, 2, '경기 성남시 분당구', '010-9999-0000', TO_DATE('2025-02-14', 'YYYY-MM-DD'));
+
+INSERT INTO Cust_addr (custid, addrid, address, phone, changedate) 
+VALUES (3, 1, '서울 강남구 역삼동', '010-3456-7890', TO_DATE('2025-05-01', 'YYYY-MM-DD'));
+
+INSERT INTO Cust_addr (custid, addrid, address, phone, changedate) 
+VALUES (4, 1, '부산 해운대구 우동', '010-4567-8901', TO_DATE('2024-08-22', 'YYYY-MM-DD'));
+
+COMMIT;
+
+(1)고객번호 1번의 주소 변경 내역을 모두 조회하시오
+SELECT address
+FROM Cust_addr
+WHERE custid = 1;
+
+(2)고객번호 1번의 전화번호 변경 내역을 모두 조회하시오
+
+SELECT phone
+FROM Cust_addr
+WHERE custid = 1;
+
+(3)고객번호 1번의 가입 당시 전화번호를 조회하시오
+
+SELECT phone
+FROM Cust_addr
+WHERE custid = 1 AND addrid = 1;
+
+(4)고객번호   1번의   “2025년   01월   01”   당시   전화번호를   보이시오.   주소   이력   중 changeday 속성값이 “2025년 01”보다 오래된 첫 번째 값을 찾는다.
+
+SELECT phone
+FROM Cust_addr
+where custid = 1 and changedate <=TO_DATE ('2025-01-01','YYYY-MM-DD');
+
+
+CREATE TABLE Cart (
+    cartid    NUMBER PRIMARY KEY,   
+    custid    NUMBER,                 
+    bookid    NUMBER,                 
+    cartdate  DATE);                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

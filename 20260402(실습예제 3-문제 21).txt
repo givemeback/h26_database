@@ -1,0 +1,96 @@
+(1)테이블을 생성하는 CREATE 문과 데이터를 삽입하는 INSERT문을 작성하시오. 테이블의  데이터  타입은  임의로  정하고,  데이터는  다음  질의의  결과가  나오도록 삽입한다.
+
+CREATE TABLE Salesperson (
+    name VARCHAR2(50) PRIMARY KEY,
+    age NUMBER,
+    salary NUMBER);
+
+CREATE TABLE Customer (
+    name VARCHAR2(50) PRIMARY KEY,
+    city VARCHAR2(50),
+    industrytype VARCHAR2(50));
+
+CREATE TABLE "Order" (
+    num NUMBER PRIMARY KEY,
+    custname VARCHAR2(50),
+    salesperson VARCHAR2(50),
+    amount NUMBER,
+    CONSTRAINT FK_ORDER_CUSTOMER FOREIGN KEY (custname) REFERENCES Customer(name),
+    CONSTRAINT FK_ORDER_SALES FOREIGN KEY (salesperson) REFERENCES Salesperson(name));
+
+
+COMMIT;
+
+(2)모든 판매원의 이름과 급여를 보이시오. 단 중복 행은 제거한다.
+
+select distinct name,salary
+from Salesperson;
+
+(3)나이가 30세 미만인 판매원의 이름을 보이시오.
+
+select name
+from Salesperson
+where age < 30;
+
+(4)‘S’로 끝나는 도시에 사는 고객의 이름을 보이시오.
+
+select name
+from customer
+where city like '%S';
+
+
+(5)주문을 한 고객의 수(서로 다른 고객만)를 구하시오.
+select distinct count(custname)
+from order;
+
+(6)판매원 각각에 대하여 주문의 수를 계산하시오.
+select salesperson,count(*)
+from order
+group by Salesperson 
+
+(7)‘LA’에 사는 고객으로부터 주문을 받은 판매원의 이름과 나이를 보이시오.(부속질의 사용)
+
+select name,age
+from Salesperson
+where name in (
+	select salesperson
+	from order
+	where custname in (
+		select name
+		from customer
+		where city ='LA')
+
+(8)‘LA’에 사는 고객으로부터 주문을 받은 판매원의 이름과 나이를 보이시오.(조인 사용)
+select s.name,s.age
+from Salesperson
+join order on s.name = o.salesperson
+join Customer on o.custname = c.name
+where c.city ='LA'
+
+(9)두 번 이상 주문을 받은 판매원의 이름을 보이시오.
+SELECT salesperson
+FROM "Order"
+GROUP BY salesperson
+HAVING COUNT(*) >= 2;
+
+(10)판매원 ‘TOM’의 봉급을 45,000원으로 변경하는 sql문을 작성하시오
+UPDATE Salesperson
+SET salary = 45000
+WHERE name = 'TOM';
+
+COMMIT;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

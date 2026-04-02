@@ -1,0 +1,91 @@
+(1)테이블을  생성하는  CREATE문과  데이터를  삽입하는  INSERT문을  작성하시오. 테이블의  데이터  타입은  임의로  정하고,  데이터는  다음  질의의  결과가  나오도록 삽입한다
+-- 1. 부서 테이블
+CREATE TABLE Department (
+    depno NUMBER PRIMARY KEY,
+    deptname VARCHAR2(50),
+    manager VARCHAR2(50)
+);
+
+-- 2. 직원 테이블 (부서번호 참조)
+CREATE TABLE Employee (
+    empno NUMBER PRIMARY KEY,
+    name VARCHAR2(50),
+    phoneno VARCHAR2(20),
+    address VARCHAR2(100),
+    sex VARCHAR2(10),
+    position VARCHAR2(30),
+    depno NUMBER,
+    CONSTRAINT FK_EMP_DEPT FOREIGN KEY (depno) REFERENCES Department(depno)
+);
+
+-- 3. 프로젝트 테이블 (부서번호 참조)
+CREATE TABLE Project (
+    projno NUMBER PRIMARY KEY,
+    projname VARCHAR2(50),
+    depno NUMBER,
+    CONSTRAINT FK_PROJ_DEPT FOREIGN KEY (depno) REFERENCES Department(depno)
+);
+
+-- 4. 근무 테이블 (직원번호와 프로젝트번호 참조)
+CREATE TABLE Works (
+    empno NUMBER,
+    projno NUMBER,
+    hours_worked NUMBER,
+    PRIMARY KEY (empno, projno),
+    CONSTRAINT FK_WORKS_EMP FOREIGN KEY (empno) REFERENCES Employee(empno),
+    CONSTRAINT FK_WORKS_PROJ FOREIGN KEY (projno) REFERENCES Project(projno)
+);
+
+(2)모든 사원의 이름을 보이시오
+
+select *
+from Employee;
+
+(3)여자 사원의 이름을 보이시오
+select name
+from Employee
+where sex = '여';
+
+(4)팀장(manager)의 이름을 보이시오
+select manager
+from Department;
+
+(5)‘IT’부서에서 일하는 사원의 이름과 주소를 보이시오
+select e.name,e.address
+from Employee e
+join Department d on d.depno = e.depno
+where d.deptname = 'IT';
+
+(6)‘홍길동’ 팀장(manager)부서에서 일하는 사원의 수를 보이시오
+select count(*)
+from Employee e
+join Department d on d.depno = e.depno
+where d.manager = '홍길동'
+
+(7)사원들이 일한 시간 수를 부서별, 사원 이름별 오름차순으로 보이시오
+
+SELECT e.depno, e.name, w.hours_worked
+FROM Employee e
+JOIN Works w ON e.empno = w.empno
+ORDER BY e.depno ASC, e.name ASC;
+
+(8)2명 이상의 사원이 참여한 프로젝트의 번호, 이름, 사원의 수를 보이시오
+SELECT p.projno, p.projname, COUNT(w.empno) AS 사원수
+FROM Project p
+JOIN Works w ON p.projno = w.projno
+GROUP BY p.projno, p.projname
+HAVING COUNT(w.empno) >= 2;
+
+(9)3명 이상의 사원이 있는 부서의 사원 이름을 보이시오
+SELECT name
+FROM Employee
+WHERE depno IN (
+    SELECT depno
+    FROM Employee
+    GROUP BY depno
+    HAVING COUNT(*) >= 3
+);
+	
+
+
+
