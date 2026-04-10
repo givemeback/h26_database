@@ -1,0 +1,144 @@
+⓵JONES와 같은 부서에 근무하는 사원의 이름을 출력하시오(JONES본인 제외)
+
+select ename
+from emp 
+where deptno = (
+select deptno
+from emp
+where ename = 'jones')
+and ename != 'jones';
+
+
+⓶각 부서에서 가장 높은 급여를 받는 사원의 이름, 급여, 부서번호를 출력하시오
+
+SELECT ENAME, SAL, DEPTNO
+FROM EMP
+WHERE (DEPTNO, SAL) IN (
+    SELECT DEPTNO, MAX(SAL) 
+    FROM EMP
+    GROUP BY DEPTNO);
+
+
+⓷30번 부서 평균 급여보다 급여가 높은 사원의 이름과 급여를 출력하시오.
+
+select ename,sal
+from emp
+where sal >(
+select avg(sal)
+from emp
+where deptno = 30);
+
+⓸MANAGER 직급 평균 급여보다 적은 CLERK 사원의 이름과 급여를 출력하시오.
+
+select ename,sal
+from emp
+where sal < (
+select avg(sal)
+from emp
+where job = 'MANAGER') and job = 'CLERK'
+
+
+⑤업무별 최고 급여를 받는 사원의 이름, 업무, 급여를 출력하시오.
+
+select ename,job,sal
+from emp
+where (job,sal) in (
+select (job,max(sal))
+from emp
+group by job);
+
+⓺KING에게 직접 보고하는 사원의 이름과 업무를 출력하시오.
+
+select ename,job
+from emp 
+where mgr = (
+select empno
+from emp 
+where ename = 'KING');
+
+⓻입사일이 가장 최근인 사원과 가장 오래된 사원을 함께 출력하시오.
+
+
+select ename
+from emp
+where
+hiredate = (select max(hiredate) from emp)
+or 
+hiredate = (select min(hiredate) from emp);
+
+
+
+
+⓼전체 평균 급여보다 급여가 높고 직위가 MANAGER인 사원을 출력하시오.
+
+select ename
+from emp 
+where sal > (
+select avg(sal)
+from emp) and 
+job = 'MANAGER';
+
+
+⓽급여가 전체 사원 급여 합계의 10%를 초과하는 사원이 이름과 급여를 출력하시오.
+
+select ename,sal
+from emp
+where sal > (
+select sum(sal)*0.1
+from emp);
+
+⓾BLAKE와 같은 직위(job)를 가진 사원의 이름과 급여를 출력하시오(BLAKE 본인 제외)
+
+select ename,sal
+from emp 
+where job = (
+select job
+from emp
+where ename = 'BLAKE')
+and ename != 'BLAKE';
+
+⑪30번 부서에 속한 사원과 같은 직위(job)를 가진 모든 사원을 출력하시오. 
+select *
+from emp 
+where job in (
+select job
+from emp
+where deptno = 30);
+
+
+⑫급여가 모든 CLERK보다 많은 사원의 이름과 급여를 출력하시오(ALL)
+
+select ename,sal
+from emp
+where sal > ALL (
+select sal
+from emp
+where job = 'clerk');
+
+⑬SALESMAN 중 누구보다도 급여가 많은 사원의 이름과 급여를 출력하시오.(ANY)
+select ename,sal
+from emp
+where sal > any (
+select sal
+from emp
+where job = 'SALESMAN');
+
+⑭부하 직원이 존재하는 (관리자인) 사원의 이름과 직위를 출력하시오(EXITS)
+
+select ename,job
+from emp
+where exitsts (
+select 1
+from emp
+where mgr = e.empno);
+
+
+⑮급여 상위 3위 안에 드는 사원의 이름과 급여를 출력하시오.
+select ename,sal
+from
+(select ename,sal
+from emp
+order by sal desc)
+
+where ROWNUM <=3
+

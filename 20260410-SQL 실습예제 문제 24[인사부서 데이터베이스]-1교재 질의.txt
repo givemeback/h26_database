@@ -1,0 +1,50 @@
+(1)교재 질의
+⓵Employees와 Departments테이블에 저장된 튜프의 개수를 출력하시오.
+
+select 
+(select count(*) from emp) as  EM튜브
+(select count(*) from emp) as DE튜브
+from dual;
+
+
+⓶Employees테이블에 대한 employee_id, job_id, hire_date,를 출력하시오.
+
+select empno as employee_id,job as job_id,hiredate as hire_date
+from emp;
+
+⓷Employees테이블에서 salary가 12,000이상인 last_name과 salary를 출력하시오.
+
+select ename,sal
+from emp 
+where sal >= 12000;
+
+⓸부서번호(department_id)가   20   혹은   50인   직원의   last_name과   department_id를 last_name에 대하여 오름차순으로 출력하시오.
+
+select ename as 이름,deptno 
+from emp
+where deptno = 20 or deptno = 50
+order by 이름 asc;
+
+⑤last_name의 세 번째에 a가 들어가는 직원의 last_name을 출력하시오.
+
+select ename
+from emp
+where ename like '__a%' ;
+
+⓺같은 일(job)을 하는 사람의 수를 세어 출력하시오
+
+select job,count(job)
+from emp 
+group by job;
+
+⓻급여(salary)의 최대값과 최소값의 차이를 구하시오.
+
+select max(sal) - min(sal)
+from emp;
+
+⓼Toronto에서 일하는 직원의 last_name, job,department_id,Department_name을 출력하시오.
+
+select e.ename,e.job,e.deprno,d.dname
+from emp e 
+join dept d on e.deptno = d.deptno
+where loc = 'Toronto'

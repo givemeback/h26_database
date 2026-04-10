@@ -1,0 +1,121 @@
+⓵사원의 이름과 소속 부서 이름을 출력하시오.
+
+select e.ename,d.dname
+from Emp e
+join Dept d on e.deptno = d.deptno;
+
+
+⓶사원의 이름과 팀장의 이름을 출력하시오.(셀프 조인)
+
+select e.ename,m.ename
+from emp e
+left join emp m on m.empno = e.mgr;
+
+
+⓷사원이 한 명도 없는 부서의 이름을 출력하시오.
+
+select dname
+from dept
+where deptno not in(
+select deptno
+from emp
+where deptno is not null);
+
+⓸NEW YORK에 근무하는 사원의 이름과 업무를 출력하시오.
+
+select e.ename,e.job
+from emp e
+join dept d on e.deptno = d.deptno
+where d.loc = 'NEW YORK'
+
+⑤사원이름, 급여, 급여 등급을 출력하시오.(SALGRADE 활용)
+
+SELECT E.ENAME, E.SAL, S.GRADE
+FROM EMP E
+JOIN SALGRADE S ON E.SAL BETWEEN S.LOSAL AND S.HISAL;
+
+
+⓺사원이름, 급여, 급여 등급, 부서 이름을 한 번에 출력하시오.
+
+SELECT E.ENAME, E.SAL, S.GRADE, D.DNAME
+FROM EMP E
+JOIN DEPT D ON E.DEPTNO = D.DEPTNO
+JOIN SALGRADE S ON E.SAL BETWEEN S.LOSAL AND S.HISAL;
+
+⓻자신의 상관보다 급여가 높은 사원의 이름과 두 사람의 급여를 출력하시오.
+
+select e.ename,e.sal,m.sal
+from emp e 
+join emp m on e.mgr = m.deptno
+where e.sal > m.sal ;
+
+
+
+⓼사원 이름, 부서이름, 근무 도시를 출력하시오.
+
+select e.ename,d.dname,d.loc
+from Emp e
+join Dept d on e.deptno = d.deptno ;
+
+
+⓽CHOICAGO에 근무하는 사원 수를 출력하시오.
+
+select count(e.empno)
+from emp e
+join dept d on e.deptno = d.deptno
+where d.loc = 'CHOICAGO'
+
+
+⓾부서별 인원 수가 많은 순으로 부서번호, 부서이름, 인원수를 출력하시오.
+
+select d.deptno,d.dname,count(e.empno)
+from dept d
+left join emp e on d.deptno = e.deptno
+group by d.deptno,d.dname
+order by count(e.empno) Desc;
+
+
+
+⑪부서별 평균 급여를 부서이름과 함께 출력하시오.
+
+select avg(e.sal),d.dname
+from emp e
+join dept d on e.deptno = d.deptno
+group by d.dname;
+
+
+
+⑫급여 등급이 3등급인 사원의 이름, 급여, 부서이름을 출력하시오.
+
+SELECT E.ENAME, E.SAL, D.DNAME
+FROM EMP E
+JOIN DEPT D ON E.DEPTNO = D.DEPTNO
+JOIN SALGRADE S ON E.SAL BETWEEN S.LOSAL AND S.HISAL
+WHERE S.GRADE = 3;
+
+
+
+⑬사원의 이름, 입사일, 입사 요일을 부서이름과 함께 출력하시오.
+
+select ename,hiredate,to_char(hiredate,'day')
+from emp;
+
+⑭같은 부서에서 근무하는 사원끼리 이름을 나란히 출력하시오.(셀프 조인, 중복제거)
+
+SELECT E1.ENAME AS 사원1, 
+       E2.ENAME AS 사원2, 
+       E1.DEPTNO AS 부서번호
+FROM EMP E1
+JOIN EMP E2 ON E1.DEPTNO = E2.DEPTNO
+WHERE E1.ENAME < E2.ENAME         
+ORDER BY E1.DEPTNO;
+
+⑮사원이름, 상관이름, 상관의 부서이름을 출력하시오(셀프+DEPTt조인)
+
+select e.ename,m.ename,d.dname
+from emp e
+join emp m on e.mgr = m.empno
+join dept d on e.deptno = d.deptno;
+
+
+

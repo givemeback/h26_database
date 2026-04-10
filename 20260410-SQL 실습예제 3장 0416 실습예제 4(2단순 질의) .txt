@@ -1,0 +1,56 @@
+⓵comm(커미션)이 NULL이 아닌 사원의 이름과 커미션을 출력하시오.
+
+selelct  ename,comm
+from emp
+where comm is not NULL;
+
+⓶급여가 1500이상 3000 이하인 사원의 이름과 급여를 급여 오름차순으로 출력하시오.
+
+select ename,sal
+from emp
+where sal between 1500 and 3000
+order by sal;
+
+⓷1981년에 입사한 사원의 이름과 입사일을 출력하시오.
+
+select ename,hiredate
+from emp 
+where hiredate  between '1981-01-01' and '1981-12-31';
+
+⓸이름의 세 번째 글자가  ‘A’인 사원을 출력하시오.
+select ename
+from emp 
+where ename like '__A%';
+
+⑤사원의 이름을 소문자로 출력하시오.
+
+select lower(ename)
+from emp;
+
+⓺사원 이름, 입사일, 오늘까지의 근무 개월 수를 출력하시오.
+
+select ename,hiredate,trunc(month_between(sysdate,hiredate))
+from emp;
+
+⓻사원 이름과 이름의 글자 수를 글자 수 내림차순으로 출력하시오.
+
+select ename,length(ename) as 글자수
+from emp 
+order by 글자수 desc;
+
+⓼comm이 NULL이면 0으로 대체하여 총소득(sal+comm)을 출력하시오.
+
+select (sal + nvl(comm,0))
+from emp;
+
+⓽ANALYST 또는 PRESIDENT인 사원의 이름, 업무, 급여를 출력하시오.
+
+SELECT ENAME, JOB, SAL
+FROM EMP
+WHERE JOB = 'ANALYST' OR JOB = 'PRESIDENT';
+
+⓾이름 길이가 긴 순, 같으면 알파벳 순으로 사원 이름을 출력하시오.
+
+select ename
+from emp
+order by length(ename) desc,ename asc;
