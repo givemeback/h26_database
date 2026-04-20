@@ -1,0 +1,214 @@
+문제 1.
+판매원별 총 주문금액과 주문 횟수를 보여주는 뷰 v_sp_order_summary를 작성하시오. (출력 컬럼 : 판매원이름, 총주문금액, 주문횟수)
+CREATE OR REPLACE VIEW v_sp_order_summary AS
+SELECT s.name AS 판매원이름,
+SUM(o.amount) AS 총주문금액,
+COUNT(o.number) AS 주문횟수
+FROM Salesperson s
+JOIN "Order" o ON s.name = o.salesperson
+GROUP BY s.name;
+
+
+문제 2.
+고객별 총 주문금액과 주문 횟수를 보여주는 뷰 v_cust_order_summary를 작성하시오. (출력 컬럼 : 고객이름, 도시, 총주문금액, 주문횟수)
+CREATE OR REPLACE VIEW v_cust_order_summary AS SELECT c.name AS 고객이름,
+c.city AS 도시,
+SUM(o.amount) AS 총주문금액, COUNT(o.number) AS 주문횟수
+FROM Customer c
+JOIN "Order" o ON c.name = o.custname GROUP BY c.name, c.city;
+
+
+문제 3.
+판매원의 평균 급여보다 높은 급여를 받는 판매원의
+이름, 나이, 급여를 보여주는 뷰 v_above_avg_salary를 작성하시오.
+
+create view v_above_avg_salary as
+select name, age, salary
+from Salesperson
+where salary > (
+select avg(salary)
+from Salesperson);
+
+
+
+문제 4.
+한 번도 주문을 받지 못한 판매원의
+이름, 나이, 급여를 보여주는 뷰 v_no_order_sp를 작성하시오.
+
+create view v_no_order_sp as
+select name, age, salary
+from Salesperson
+where name not in (
+select distinct salesperson
+from order);
+
+
+
+
+
+문제 5.
+'LA'에 거주하는 고객으로부터 주문을 받은 판매원의
+이름, 나이, 급여를 보여주는 뷰 v_la_order_sp를 작성하시오.
+
+create view v_la_order_sp as
+select name, age, salary
+from Salesperson
+where name in ( 
+select salesperson
+from Order
+where custname in (
+select name
+from Customer
+where city = 'LA'
+));
+
+
+
+
+문제 6.
+판매원별 평균 주문금액을 계산하여
+전체 평균 주문금액보다 높은 판매원의 이름과 평균주문금액을 보여주는
+뷰 v_above_avg_order_sp를 작성하시오.
+
+
+create view v_above_avg_order_sp as
+select salesperson,avg(amount)
+from Order
+group by salesperson
+having avg(amount) > (
+select avg(amount)
+from order);
+
+
+
+문제 7.
+한 번도 주문하지 않은 고객의
+이름, 도시, 직업을 보여주는 뷰 v_no_order_cust를 작성하시오.
+
+create view v_no_order_cust as
+select name, city, industrytype
+from Customer
+where name not in (
+select custname
+from Order);
+
+
+
+
+문제 8.
+2건 이상 주문을 받은 판매원의
+이름과 주문 횟수, 총 주문금액을 보여주는 뷰 v_frequent_sp를 작성하시오.
+
+create view v_frequent_sp as
+select salesperson,count(number),sum(amount)
+from Order
+group by Salesperson
+having count(number) >= 2;
+
+
+
+문제 9.
+고객의 도시별 총 주문금액과 주문 건수를 보여주는
+뷰 v_city_order_stats를 작성하시오.
+(출력 컬럼 : 도시, 총주문금액, 주문건수)
+
+create view v_city_order_stats as
+select c.city,sum(o.amount),count(o.amount)
+from Customer c
+join Order on c.name = o.custname
+group by c.city;
+
+
+
+
+문제 10.
+판매원별 최고 주문금액, 최저 주문금액, 평균 주문금액과
+자신의 급여 대비 총 주문금액 비율을 보여주는
+뷰 v_sp_order_stats를 작성하시오.
+(출력  컬럼  :  판매원이름,  급여,  최고주문금액,  최저주문금액,  평균주문금액,  급여대비주문비율)
+
+CREATE VIEW v_sp_order_stats AS
+SELECT 
+    s.name AS 판매원이름, 
+    s.salary AS 급여, 
+    MAX(o.amount) AS 최고주문금액, 
+    MIN(o.amount) AS 최저주문금액, 
+    AVG(o.amount) AS 평균주문금액,
+    (SUM(o.amount) / s.salary) * 100 AS 급여대비주문비율
+FROM Salesperson s
+JOIN Order o ON s.name = o.salesperson
+GROUP BY s.name, s.salary;
+
+
+
+
+문제 11.
+직업별 총 주문금액과 평균 주문금액을 보여주는
+뷰 v_industry_order_stats를 작성하시오.
+(출력 컬럼 : 직업, 총주문금액, 평균주문금액)
+
+create view v_industry_order_stats as
+select c.industrytype,sum(o.amount),avg(o.amount)
+from Customer c
+join Order o on c.name = o.custname
+group by c.industrytype;
+
+
+
+문제 12.
+판매원 중 자신의 급여보다 총 주문금액이 더 높은 판매원의
+이름, 급여, 총주문금액을 보여주는 뷰 v_sp_order_over_salary를 작성하시오. 
+
+create view v_sp_order_over_salary as
+select s.name, s.salary, sum(s.amount)
+from Salesperson s
+join Order o on s.name =  o.salesperson
+group by s.name,s.salary
+having s.salary < sum(o.amount);
+
+
+문제 13.
+각 판매원이 주문을 받은 고객의 수(서로 다른 고객만)와
+총 주문금액을 보여주는 뷰 v_sp_cust_count를 작성하시오.
+(출력 컬럼 : 판매원이름, 담당고객수, 총주문금액)
+
+create view v_sp_cust_count as
+select s.name,count(o.custname),sum(amount)
+from Salesperson s
+join Order o on s.name = o.salesperson
+group by s.name;
+
+
+
+
+
+문제 14.
+주문 금액이 가장 높은 주문을 한 고객의
+이름, 도시, 직업, 주문금액을 보여주는 뷰 v_max_order_cust를 작성하시오.
+
+create view v_max_order_cust as
+select c.name, c.city,o.amount
+from Customer c
+join Order o on c.name = o.custname
+where o.amount (
+select max(amount)
+from Order);
+
+문제 15.
+판매원별로 주문금액의 합계를 구하고,
+전체 주문금액 대비 각 판매원의 주문 비중을 보여주는
+뷰 v_sp_order_ratio를 작성하시오.
+(출력 컬럼 : 판매원이름, 총주문금액, 전체주문금액, 주문비중)
+
+CREATE VIEW v_sp_order_ratio AS
+SELECT 
+    salesperson AS 판매원이름, 
+    SUM(amount) AS 총주문금액, 
+    (SELECT SUM(amount) FROM Order) AS 전체주문금액,
+    (SUM(amount) / (SELECT SUM(amount) FROM Order)) * 100 AS 주문비중
+FROM Order
+GROUP BY salesperson;
+
+
+
+
