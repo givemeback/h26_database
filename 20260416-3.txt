@@ -1,0 +1,113 @@
+
+문제 1.
+모든 사원의 사원번호, 이름, 부서명, 직급, 급여를 보여주는 뷰 v_emp_basic을 작성하시오.
+
+create view v_emp_basic as 
+select e.empno,e.name,d.deptaname,e.position,e.sal
+from Employee e
+join Department d on e.depno = d.depno;
+
+
+문제 2.
+급여가 500만원 이상인 사원의 이름, 직급, 급여, 부서명을 보여주는 읽기 전용 뷰 v_high_salary_emp를 작성하시오.
+
+create view v_high_salary_emp as 
+select e.name,e.position,e.sal,d.deptname
+from Employee e
+join Department d on e.depno = d.depno;
+where e.sal >= 500
+With read only;
+
+
+문제 3.
+현재 진행 중인 프로젝트(오늘 날짜가 시작일과 종료일 사이)의 프로젝트번호, 프로젝트명, 시작일, 종료일을 보여주는 뷰 v_active_projects를 작성하시오.
+
+create view v_active_projects as
+select projno,projname,start_date,end_date
+from Project
+where CURRENT_DATE between start_date and end_date
+
+
+
+문제 4.
+입사일이 2019년 이전인 사원의 사원번호, 이름, 부서명, 입사일, 근속연수를 보여주는 뷰 v_veteran_employee를 작성하시오.
+(근속연수는 현재 연도 기준으로 계산)
+
+create view v_veteran_employee as
+select e.empno,e.name,d.deptname,e.hiredate,(2026 - Year(e.hiredate))
+from Employee e
+join Department d on e.depno = d.depno
+where Year(e.hiredate) < 2019;
+
+
+
+문제 5.
+부서 위치가 '서울'인 부서의 부서번호, 부서명, 예산을 보여주는 뷰 v_seoul_department 를 작성하시오.
+
+create view v_seoul_departmente as
+select depno, deptname, budget
+from Department
+where location = '서울';
+
+
+문제 6.
+직급이 '부장' 또는 '이사'인 사원의 사원번호, 이름, 직급, 급여를 보여주는
+읽기 전용 뷰 v_senior_position를 작성하시오.
+
+create view v_senior_position as
+select empno,name,position,sal
+from Employee
+where position = '부장' or position = '이사'
+with read only;
+
+
+
+문제 7.
+프로젝트에서  'PM'  역할을  담당하는  사원의  사원번호,  프로젝트번호,  담당역할,  투입시간 을 보여주는 뷰 v_pm_role을 작성하시오.
+
+create view v_pm_role as
+select empno,projno,role,hours_worked
+from works
+where role = 'PM';
+
+
+
+
+문제 8.
+급여가 300만원 미만인 사원 중 입사일이 2022년 이후인 사원의 이름, 직급, 급여, 입사 일을 보여주는 뷰 v_junior_emp를 작성하시오.
+
+create view v_junior_emp as
+select name,position,sal,hiredate
+from Employee
+where sal < 3000000 and Year(hiredate) >= 2022;
+
+
+
+
+문제 9.
+예산이 1억원 이상인 프로젝트의 프로젝트명, 시작일, 종료일, 예산을 보여주는
+읽기 전용 뷰 v_large_budget_project를 작성하시오.
+
+create view v_large_budget_project as
+select projname,start_date,end_date,budget
+from Project
+where budget >= 100000000
+with read only;
+
+
+문제 10.
+관리자가 없는 최상위 관리자이면서 급여가 700만원 이상인 사원의
+사원번호, 이름, 부서명, 직급, 급여를 보여주는 읽기 전용 뷰 v_top_executive를 작성하시오.
+
+CREATE VIEW v_top_executive AS
+SELECT e.empno, e.name, d.deptname, e.position, e.sal
+FROM Employee e
+JOIN Department d ON e.depno = d.depno     
+WHERE e.manager IS NULL                   
+  AND e.sal >= 7000000                     
+WITH READ ONLY;
+
+
+
+
+

@@ -1,0 +1,139 @@
+문제 1.
+출판사별로 판매된 도서 수와 총 판매금액을 보여주는 뷰 v_publisher_sales를 작성하시 오.
+(출력 컬럼: 출판사, 판매도서수, 총판매금액)
+
+create view v_publisher_sales
+select b.publisher,count(o.orderid),sum(o.saleprice)
+from orders o
+join book b on o.bookid = b.bookid
+group by b.publisher;
+
+
+
+문제 2.
+고객별   평균   구매금액을   계산하고,   전체   고객   평균보다   높은   고객만   보여주는   뷰 v_above_avg_customer를 작성하시오.
+(출력 컬럼: 고객이름, 평균구매금액)
+
+create view v_above_avg_customer
+select c.name,avg(o.saleprice)
+from Customer c
+join orders o on c.custid = o.custid
+group by c.name
+having avg(o.saleprice) > (
+select avg(saleprice)
+from orders);
+
+
+문제 3.
+주문 내역에서 도서명, 고객이름, 주문일자, 판매가격을 출력하되 판매가격이 높은 순으로 정렬된 뷰 v_orders_detail을 작성하시오.
+
+create view v_orders_detail
+select b.bookname,c.name,o.orderdate,o.saleprice
+from customer c
+join orders o on c.custid = o.custid
+join book b on o.bookid = b.bookid
+order by o.saleprice desc;
+
+
+문제 4.
+2권 이상 주문한 고객의 이름과 주문 횟수를 보여주는 뷰 v_frequent_customer를 작성 하시오.
+
+create view v_frequent_customer
+select c.name,count(o.orderid)
+from customer c
+join orders o on c.custid = o.custid
+group by c.name
+having count(o.orderid) >= 2;
+
+
+
+
+
+문제 5.
+각 고객이 마지막으로 주문한 도서명과 주문일자를 보여주는 뷰 v_last_ordered_book을 작성하시오.
+(출력 컬럼: 고객이름, 도서명, 주문일자)
+
+create view v_frequent_customer
+select c.name,b.bookname,o.orderdate
+from customer c
+join orders o on c.custid = o.custid
+join book b on o.bookid = b.bookid
+where o.orderdate = (
+select max(o2.orderdate)
+from order o2
+where o2.custid = c.custid);
+
+
+문제 6.
+도서    정가    대비    평균    할인율이    가장    높은    출판사    순으로    보여주는    뷰 v_publisher_discount_rate를 작성하시오.
+(출력 컬럼: 출판사, 평균할인율)
+단, 정가보다 낮게 팔린 경우만 포함한다.
+
+create view v_publisher_discount_rate
+select b.publisher,avg((b.price-o.saleprice)/b.price)*100
+from Book b
+join orders o on b.bookid = o.bookid
+where b.price > o.saleprice 
+group by b.publisher
+order by avg((b.price-o.saleprice)/b.price) desc;
+
+
+
+문제 7.
+한 번이라도 주문한 적 있는 고객과 한 번도 주문하지 않은 고객을 구분하여 보여주는 뷰 v_customer_order_status를 작성하시오.
+(출력 컬럼: 고객이름, 주문여부)
+단, 주문여부는 '주문있음' / '주문없음'으로 표시한다.
+
+create view v_customer_order_status
+select distinct c.name,
+CASE WHEN orderid IS NULL THEN '주문없음' ELSE '주문있음' END
+from customer c
+left join orders o on c.custid = o.custid;
+
+
+
+
+문제 8.
+월별 총 판매금액과 주문 건수를 보여주는 뷰 v_monthly_sales를 작성하시오.
+(출력 컬럼: 년도, 월, 총판매금액, 주문건수)
+
+create view v_monthly_sales
+select TO_CHAR(orderdate,'YYYY') as "년도",TO_CHAR(orderdate,'MM') as "월",sum(saleprice),count(orderid)
+from orders
+group by TO_CHAR(orderdate,'YYYY'),TO_CHAR(orderdate,'MM')
+order by "년도","월";
+
+
+
+
+
+문제 9.
+같은 출판사의 도서를 2종류 이상 구매한 고객의 이름과 출판사, 구매 종류 수를 보여주는 뷰 v_publisher_loyal_customer를 작성하시오.
+
+create view v_publisher_loyal_customer
+select c.name,b.publisher,count(b.bookid)
+from customer c
+join orders o on c.custid = o.custid
+join book b on o.bookid = b.bookid
+group by c.name,b.publisher
+having count(o.orderid) >= 2;
+
+
+문제 10.
+도서별로  최고가,  최저가,  평균가로  판매된  가격과  정가  대비  최대  할인금액을  보여주는 뷰 v_book_price_stats를 작성하시오.
+(출력 컬럼: 도서명, 출판사, 최고판매가, 최저판매가, 평균판매가, 최대할인금액)
+
+
+CREATE VIEW v_book_price_stats AS
+SELECT 
+    B.bookname AS "도서명", 
+    B.publisher AS "출판사", 
+    MAX(O.saleprice) AS "최고판매가", 
+    MIN(O.saleprice) AS "최저판매가", 
+    AVG(O.saleprice) AS "평균판매가", 
+    (B.price - MIN(O.saleprice)) AS "최대할인금액"
+FROM Book B
+JOIN Orders O ON B.bookid = O.bookid
+GROUP BY B.bookname, B.publisher, B.price; -- 그룹화 기준을 명확히!
+
+
