@@ -1,0 +1,107 @@
+문제 1.
+모든 극장의 극장번호, 극장이름, 위치를 보여주는 뷰 v_theater_info를 작성하시오.
+
+create view v_theater_info as
+select *
+from 극장;
+
+
+
+문제 2.
+위치가 '강남'인 극장의 극장번호, 극장이름을 보여주는 읽기 전용 뷰 v_gangnam_theater를 작성하시오.
+
+create view v_gangnam_theater as
+select 극장번호, 극장이름
+from 극장
+where 위치 = '강남'
+with read only;
+
+
+문제 3.
+가격이 10,000원 이상인 상영관의 극장번호, 상영관번호, 영화제목, 가격을 보여주는 읽기 전용 뷰 v_high_price_screen을 작성하시오.
+
+create view v_high_price_screen as
+
+select 극장번호, 상영관번호, 영화제목, 가격
+from 상영관
+where 가격 >= 10000
+with read only;
+
+
+
+문제 4.
+좌석수가 100석 이상인 상영관의 극장번호, 상영관번호, 영화제목, 좌석수를 보여주는 뷰 v_large_screen을 작성하시오.
+
+create view v_large_screen as
+select 극장번호, 상영관번호, 영화제목, 좌석수
+from 상영관
+where 좌석수 >= 100;
+
+
+
+
+문제 5.
+주소가 '강남'인 고객의 고객번호, 이름, 주소를 보여주는 읽기 전용 뷰 v_gangnam_customer를 작성하시오.
+
+create view v_gangnam_customer as
+select 고객번호, 이름, 주소
+from 고객
+where 주소 = '강남'
+with read only;
+
+
+문제 6.
+2025년 9월 1일에 예약된 내역의 극장번호, 상영관번호, 고객번호, 좌석번호, 날짜를 보여주는 뷰 v_reservation_20250901을 작성하시오.
+
+create view v_reservation_20250901 as
+select 극장번호, 상영관번호, 고객번호, 좌석번호, 날짜
+from 예약
+where 날짜 = '2025-09-01';
+
+
+문제 7.
+가격이 7,500원 이상 10,000원 이하인 상영관의 극장번호, 상영관번호, 영화제목, 가격을 보여 주는 뷰 v_mid_price_screen을 작성하시오.
+단, 조건을 벗어나는 데이터는 입력할 수 없도록 설정하시오.
+
+create view v_mid_price_screen as
+select 극장번호, 상영관번호, 영화제목, 가격
+from 상영관
+where 가격 between 7500 and 10000
+with check option;
+
+
+
+문제 8.
+좌석번호가 20번 이하인 예약 내역의 극장번호, 상영관번호, 고객번호, 좌석번호를 보여주는 뷰 v_front_seat_reservation을 작성하시오.
+
+
+create view v_front_seat_reservation as
+select 극장번호, 상영관번호, 고객번호, 좌석번호
+from 예약
+where 좌석번호 <= 20;
+
+
+
+
+문제 9.
+영화제목에 '영화'가 포함된 상영관의 극장번호, 상영관번호, 영화제목, 가격, 좌석수를 보여주 는 읽기 전용 뷰 v_movie_screen을 작성하시오.
+
+create view v_movie_screen as
+select 극장번호, 상영관번호, 영화제목, 가격, 좌석수
+from 상영관
+where 영화제목 like '%영화%'
+with read only;
+
+
+
+문제 10.
+주소가 '잠실'인 고객의 고객번호, 이름, 주소를 보여주는 뷰 v_jamsil_customer를 작성하시 오.  단, 조건을 벗어나는 데이터는 입력할 수 없도록 설정하시오.
+
+create view v_jamsil_customer as
+select 고객번호, 이름, 주소
+from 고객
+where 주소 = '잠실'
+with check option;
+
+
+

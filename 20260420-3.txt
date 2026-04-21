@@ -1,0 +1,72 @@
+문제 11.
+직업별 총 주문금액과 평균 주문금액을 보여주는
+뷰 v_industry_order_stats를 작성하시오.
+(출력 컬럼 : 직업, 총주문금액, 평균주문금액)
+
+create view  v_industry_order_stats as
+select c.industrytype, sum(o.amount), avg(o.amount)
+from Customer c
+join [Order] o on c.name= o.custname
+group by c.industrytype;
+
+
+문제 12.
+판매원 중 자신의 급여보다 총 주문금액이 더 높은 판매원의
+이름, 급여, 총주문금액을 보여주는 뷰 v_sp_order_over_salary를 작성하시오.
+
+create view  v_sp_order_over_salary as
+select s.name, s.salary, sum(o.amount)
+from Salesperson s
+join [Order] o on o.salesperson = s.name
+group by s.name, s.salary
+having s.salary < sum(o.amount)
+
+
+
+
+문제 13.
+각 판매원이 주문을 받은 고객의 수(서로 다른 고객만)와
+총 주문금액을 보여주는 뷰 v_sp_cust_count를 작성하시오.
+(출력 컬럼 : 판매원이름, 담당고객수, 총주문금액)
+
+create view v_sp_cust_count as
+select salesperson,count(custname),sum(amount)
+from [Order]
+group by salesperson;
+
+
+
+
+
+
+문제 14.
+주문 금액이 가장 높은 주문을 한 고객의
+이름, 도시, 직업, 주문금액을 보여주는 뷰 v_max_order_cust를 작성하시오. 
+
+create view v_max_order_cust as
+select c.name, c.city, c.industrytype, o.amount
+from Customer c
+join [Order] o on c.name = o.custname
+where o.amount =(
+select max(amount)
+from [order]);
+
+
+
+문제 15.
+
+판매원별로 주문금액의 합계를 구하고,
+전체 주문금액 대비 각 판매원의 주문 비중을 보여주는
+뷰 v_sp_order_ratio를 작성하시오.
+(출력 컬럼 : 판매원이름, 총주문금액, 전체주문금액, 주문비중)
+
+CREATE VIEW v_sp_order_ratio AS
+SELECT 
+    salesperson AS 판매원이름, 
+    SUM(amount) AS 총주문금액,
+    (SELECT SUM(amount) FROM [Order]) AS 전체주문금액,
+    (SUM(amount) / (SELECT SUM(amount) FROM [Order])) * 100 AS 주문비중
+FROM [Order]
+GROUP BY salesperson;
+
+

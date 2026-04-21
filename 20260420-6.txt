@@ -1,0 +1,231 @@
+(극장 데이터베이스 복합 뷰 문제)
+극장(극장번호, 극장이름, 위치)
+상영관(극장번호, 상영관번호, 영화제목, 가격, 좌석수)
+고객(고객번호, 이름, 주소)
+예약(극장번호, 상영관번호, 고객번호, 좌석번호, 날짜)
+
+
+문제 1.
+극장별 상영관 수와 평균 가격을 보여주는 뷰 v_theater_screen_stats를 작성하시오. (출력 컬럼 : 극장이름, 위치, 상영관수, 평균가격)
+
+create view v_theater_screen_stats as
+select 극장.극장이름, 극장.위치, 상영관.COUNT(상영관번호) AS 상영관수,AVG(상영관.가격) AS 평균가격
+from 극장 극장
+join 상영관 상영관 on 극장.극장번호 = 상영관.극장번호
+group by 극장.극장이름, 극장.위치
+
+
+
+
+문제 2.
+각 극장의 상영관 중 가격이 가장 비싼 영화제목과 가격을 보여주는
+뷰 v_theater_max_price를 작성하시오.
+(출력 컬럼 : 극장이름, 영화제목, 가격)
+
+create view v_theater_max_price as
+select 극장.극장이름, 상영관.영화제목, 상영관.가격
+from 극장 극장
+join 상영관 상영관 on 극장.극장번호 = 상영관.극장번호
+where 상영관.가격 = (
+select max(상영관.가격)
+from 상영관 s2
+where s2.극장번호 = 극장.극장번호
+);
+
+
+
+
+
+
+문제 3.
+고객별 총 예약 횟수를 보여주는 뷰 v_customer_reservation_count를 작성하시오. (출력 컬럼 : 고객이름, 주소, 총예약횟수)
+
+create view v_customer_reservation_count as
+select 고객.고객이름, 고객.주소, 예약.고객번호 AS 총예약횟수
+from 고객 고객
+left join 예약 예약 on 고객.고객번호 = 예약.고객번호;
+group by 고객.고객이름, 고객.주소
+
+
+문제 4.
+한 번도 예약하지 않은 고객의
+고객번호, 이름, 주소를 보여주는 뷰 v_no_reservation_customer를 작성하시오. 
+
+create view v_no_reservation_customer as
+select 고객번호, 이름, 주소
+from 고객
+where 고객번호 not in (
+select 고객번호
+from 예약);
+
+
+
+
+
+문제 5.
+예약이 한 번도 없는 상영관의 극장번호, 상영관번호, 영화제목, 가격을 보여주는 뷰 v_no_reservation_screen을 작성하시오.
+
+create view v_no_reservation_screen as
+select 극장번호, 상영관번호, 영화제목, 가격
+from 상영관
+where (극장번호, 상영관번호) not in (
+select 극장번호, 상영관번호
+from 예약);
+
+
+
+문제 6.
+극장별 총 예약 건수와 총 예약 좌석수를 보여주는 뷰 v_theater_reservation_stats를 작성하시오.
+(출력 컬럼 : 극장이름, 총예약건수, 총예약좌석수)
+
+create view v_theater_reservation_stats as
+select 극장.극장이름, count(예약.고객번호) as 총예약건수, count(*) as 총예약좌석수
+from 극장 극장
+join 예약 예약 on 극장.극장번호 = 예약.극장번호
+group by 극장.극장이름;
+
+
+
+문제 7.
+'강남'에 사는 고객이 예약한 내역의
+고객이름, 극장번호, 상영관번호, 좌석번호, 날짜를 보여주는 뷰
+v_gangnam_customer_reservation을 작성하시오.
+
+create view v_gangnam_customer_reservation as
+select 고객.고객이름, 예약.극장번호, 예약.상영관번호, 예약.좌석번호, 예약.날짜
+from 고객 고객
+join 예약 예약 on 고객.극장번호 = 예약.극장번호;
+
+
+
+
+문제 8.
+상영관별 예약 건수와 전체 좌석수 대비 예약된 좌석의 비율을 보여주는
+뷰 v_screen_reservation_rate를 작성하시오.
+(출력 컬럼 : 극장번호, 상영관번호, 영화제목, 좌석수, 예약건수, 예약률)
+단, 예약률은 소수점 2자리까지 표시한다.
+
+create view v_screen_reservation_rate as
+select 상영관.극장번호, 상영관.상영관번호, 상영관.영화제목, 상영관.좌석수, 예약.count(*) AS 예약건수, round(count(고객.고객번호)/예약.좌석수 * 100,2) as 예약률
+from 상영관 상영관
+left join 예약 예약 on 고객.극장번호 = 예약.극장번호 and 고객.상영관번호 = 예약.상영관번호
+group by 상영관.극장번호, 상영관.상영관번호, 상영관.영화제목, 상영관.좌석수;
+
+
+
+문제 9.
+2건 이상 예약한 고객의
+이름, 주소, 예약횟수를 보여주는 뷰 v_frequent_customer를 작성하시오.
+
+create view v_frequent_customer as
+select 고객.이름, 고객.주소, count(예약.고객번호) as 예약횟수
+from 고객 고객
+join 예약 예약 on 고객.고객번호 = 예약.고객번호
+group by 고객.이름, 고객.주소,고객.고객번호
+having count(예약.고객번호) >= 2;
+
+
+
+문제 10.
+영화제목별 총 예약 건수와 총 예약 금액을 보여주는
+뷰 v_movie_reservation_stats를 작성하시오.
+(출력 컬럼 : 영화제목, 총예약건수, 총예약금액)
+
+create view v_movie_reservation_stats as
+select 상영관.영화제목, count(예약.고객번호) as 총예약건수,sum(상영관.가격) as 총예약금액
+from 상영관 상영관
+join 예약 예약 on 상영관.극장번호 = 예약.극장번호 and 상영관.상영관번호 = 예약.상영관번호
+group by 상영관.영화제목;
+
+
+문제 11.
+극장 위치별 평균 영화 가격과 총 상영관 수를 보여주는
+뷰 v_location_screen_stats를 작성하시오.
+(출력 컬럼 : 위치, 평균가격, 총상영관수)
+
+create view v_location_screen_stats as
+select 극장.위치, round(avg(상영관.가격),0) as 평균가격, count(상영관.극장번호) as 총상영관수
+from 극장 극장
+join 상영관 상영관 on 극장.극장번호 = 상영관.극장번호
+group by 극장.위치 ;
+
+
+문제 12.
+각 고객이 가장 최근에 예약한 날짜와 예약한 극장번호, 상영관번호를 보여주는 뷰 v_customer_last_reservation을 작성하시오.
+(출력 컬럼 : 고객이름, 극장번호, 상영관번호, 최근예약날짜)
+
+
+create view v_customer_last_reservation as
+select 고객.이름, 예약.극장번호, 예약.상영관번호, 예약.날짜 as 최근예약날짜
+from 고객 고객
+join 예약 예약 on 고객.고객번호 = 예약.고객번호
+where 예약.날짜 =
+(select max(예약2.날짜)
+from 예약 예약2
+where 예약2.고객번호 = 고객.고객번호);
+
+
+
+문제 13.
+전체 평균 가격보다 비싼 상영관의
+극장이름, 상영관번호, 영화제목, 가격을 보여주는 뷰 v_above_avg_price_screen을 작성하시오.
+
+create view v_above_avg_price_screen as
+select 극장.극장이름, 상영관.상영관번호, 상영관.영화제목, 상영관.가격
+from 극장 극장 
+join 상영관 상영관 on 극장.극장번호 = 상영관.극장번호
+where 상영관.가격 >(
+select avg(가격)
+from 상영관);
+
+
+
+
+
+문제 14.
+극장별로 예약 건수가 가장 많은 상영관의
+극장이름, 상영관번호, 영화제목, 예약건수를 보여주는 뷰 v_most_reserved_screen을 작성하시오.--------못품
+
+CREATE VIEW v_most_reserved_screen AS
+SELECT 
+    T.극장이름, 
+    S.상영관번호, 
+    S.영화제목, 
+    COUNT(R.고객번호) AS 예약건수
+FROM 극장 T
+JOIN 상영관 S ON T.극장번호 = S.극장번호
+JOIN 예약 R ON S.극장번호 = R.극장번호 AND S.상영관번호 = R.상영관번호
+GROUP BY T.극장이름, S.상영관번호, S.영화제목
+HAVING COUNT(R.고객번호) = (
+    SELECT MAX(sub_count)
+    FROM (
+        SELECT COUNT(*) AS sub_count, R2.극장번호
+        FROM 예약 R2
+        GROUP BY R2.극장번호, R2.상영관번호
+    ) AS summary
+    WHERE summary.극장번호 = T.극장번호
+);
+
+
+
+문제 15.
+고객별 총 예약금액을 계산하고전체 예약금액 대비 각 고객의 예약 비중을 보여주는
+뷰 v_customer_payment_ratio를 작성하시오.
+(출력 컬럼 : 고객이름, 총예약금액, 전체예약금액, 예약비중)
+
+CREATE VIEW v_customer_payment_ratio AS
+SELECT 
+    C.이름 AS 고객이름, 
+    SUM(S.가격) AS 총예약금액,
+    (SELECT SUM(S2.가격) FROM 예약 R2 JOIN 상영관 S2 ON R2.극장번호 = S2.극장번호 AND R2.상영관번호 = S2.상영관번호) AS 전체예약금액,
+    ROUND(SUM(S.가격) * 100.0 / (SELECT SUM(S3.가격) FROM 예약 R3 JOIN 상영관 S3 ON R3.극장번호 = S3.극장번호 AND R3.상영관번호 = S3.상영관번호), 2) AS 예약비중
+FROM 고객 C
+JOIN 예약 R ON C.고객번호 = R.고객번호
+JOIN 상영관 S ON R.극장번호 = S.극장번호 AND R.상영관번호 = S.상영관번호
+GROUP BY C.이름, C.고객번호;
+
+
+
+
+
+
