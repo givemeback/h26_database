@@ -1,0 +1,209 @@
+1. 직원 전체 정보 통합 뷰를 작성하시오
+(직원 정보와 소속 부서명을 함께 조회하는 뷰)
+
+create view 직원_전체_정보_통합 as
+select 
+    e.empno as 사원번호,
+    e.name as 성명,
+    e.position as 직급,
+    d.deptname as 부서명,
+    e.phoneno as 전화번호,
+    e.address as 주소
+from employee e
+join department d on e.deptno = d.deptno;
+
+2. 직원별 프로젝트 참여 현황 뷰를 작성하시오
+(직원이 참여 중인 프로젝트명과 투입 시간 조회하는 뷰)
+
+create view 직원별_프로젝트_참여_현황 as
+select 
+    e.name as 성명,
+    p.proname as 프로젝트명,
+    w.hours_worked as 투입시간,
+    e.position as 직급
+from employee e
+join works w on e.empno = w.empno
+join project p on w.projno = p.projno;
+
+
+
+3. 부서별 직원 수 및 현황 뷰를 작성하시오
+(부서별 소속 직원 수와 관리자 정보 집계 뷰)
+
+create view 부서별_직원_수_및_현황 as
+select 
+    d.deptname as 부서명,
+    d.manager as 부서장,
+    count(e.empno) as 직원_수
+from department d
+left join employee e on d.deptno = e.deptno
+group by d.deptname, d.manager;
+
+
+4. 프로젝트별 참여 직원 및 총 투입 시간 뷰를 작성하시오
+(각 프로젝트에 참여한 직원 수와 총 근무 시간 집계 뷰)
+
+create view 프로젝트별_참여_현황_통계 as
+select 
+    p.proname as 프로젝트명,
+    count(w.empno) as 참여_직원_수,
+    sum(w.hours_worked) as 총_투입_시간
+from project p
+left join works w on p.projno = w.projno
+group by p.proname;
+
+
+
+
+5. 직원별 총 근무 시간 뷰를 작성하시오
+(직원이 전체 프로젝트에 투입한 총 시간 집계 뷰)
+
+create view 직원별_총_근무_시간 as
+select 
+    e.empno as 사원번호,
+    e.name as 성명,
+    sum(w.hours_worked) as 전체_투입_시간
+from employee e
+left join works w on e.empno = w.empno
+group by e.empno, e.name;
+
+
+6. 부서별 프로젝트 현황 뷰를 작성하시오
+(각 부서가 담당하는 프로젝트 수와 총 투입 시간 집계 뷰)
+
+create view 부서별_프로젝트_현황 as
+select 
+    d.deptname as 부서명,
+    count(distinct p.projno) as 담당_프로젝트_수,
+    sum(w.hours_worked) as 부서_총_투입시간
+from department d
+left join project p on d.deptno = p.deptno
+left join works w on p.projno = w.projno
+group by d.deptname;
+
+
+
+7. 프로젝트에 참여하지 않는 직원 뷰를 작성하시오
+(어떤 프로젝트에도 투입되지 않은 직원 조회 뷰)
+
+create view 프로젝트_미참여_직원_조회 as
+select 
+    e.empno as 사원번호, 
+    e.name as 성명,
+    e.deptno as 부서번호
+from employee e
+left join works w on e.empno = w.empno
+where w.empno is null;
+
+8. 성별 프로젝트 참여 통계 뷰를 작성하시오
+(성별(sex)에 따른 프로젝트 참여 수와 평균 근무 시간 비교 뷰)
+
+create view 성별_프로젝트_참여_통계 as
+select 
+    e.sex as 성별,
+    count(w.projno) as 총_참여_건수,
+    avg(w.hours_worked) as 평균_근무_시간
+from employee e
+join works w on e.empno = w.empno
+group by e.sex;
+
+
+9. 관리자(Manager) 직원 상세 뷰를 작성하시오
+(부서 관리자로 지정된 직원의 상세 정보 조회 뷰)
+
+create view 관리자_상세_정보 as
+select 
+    d.deptname as 관리부서,
+    e.name as 성명,
+    e.position as 직급,
+    e.phoneno as 전화번호,
+    e.address as 주소,
+    e.sex as 성별
+from department d
+join employee e on d.manager = e.name;
+
+
+10. 직책별 프로젝트 참여 현황 뷰를 작성하시오
+(직책(position)별 총 프로젝트 참여 건수와 평균 투입 시간 뷰)
+
+create view 직책별_프로젝트_참여_현황 as
+select 
+    e.position as 직책,
+    count(w.projno) as 총_참여_건수,
+    avg(w.hours_worked) as 평균_투입_시간
+from employee e
+join works w on e.empno = w.empno
+group by e.position;
+
+11. 다중 프로젝트 참여 직원 뷰를 작성하시오
+(2개 이상의 프로젝트에 참여 중인 직원 조회 뷰)12. 부서 내 프로젝트 참여 직원 상세 뷰를 작성하시오
+(같은 부서 소속 직원이 해당 부서 프로젝트에 참여하는 현황 뷰)
+
+create view 다중_프로젝트_참여_직원 as
+select 
+    e.empno as 사원번호,
+    e.name as 성명,
+    count(w.projno) as 참여_프로젝트_수
+from employee e
+join works w on e.empno = w.empno
+group by e.empno, e.name
+having count(w.projno) >= 2;
+
+
+13. 타 부서 프로젝트 참여 직원 뷰를 작성하시오
+(자신의 소속 부서가 아닌 타 부서 프로젝트에 참여하는 직원 뷰)
+
+create view 타_부서_프로젝트_참여_직원 as
+select 
+    e.name as 성명,
+    d1.deptname as 소속부서명,
+    p.proname as 참여프로젝트명,
+    d2.deptname as 프로젝트주관부서,
+    w.hours_worked as 투입시간
+from employee e
+join department d1 on e.deptno = d1.deptno
+join works w on e.empno = w.empno
+join project p on w.projno = p.projno
+join department d2 on p.deptno = d2.deptno
+where e.deptno <> p.deptno;
+
+
+
+
+14. 고투입 시간 직원 뷰 (평균 이상 근무)를 작성하시오 (프로젝트 평균 투입 시간보다 많이 근무한 직원 조회 뷰)
+
+
+create view 고투입_시간_직원 as
+select 
+    e.name as 성명,
+    p.proname as 프로젝트명,
+    w.hours_worked as 투입시간
+from employee e
+join works w on e.empno = w.empno
+join project p on w.projno = p.projno
+where w.hours_worked > (
+    select avg(hours_worked) 
+    from works
+);
+
+
+
+15. 프로젝트 미배정 부서 뷰를 작성하시오 (담당 프로젝트가 하나도 없는 부서 조회 뷰)
+
+create view 고투입_시간_직원 as
+select 
+    e.name as 성명,
+    p.proname as 프로젝트명,
+    w.hours_worked as 투입시간
+from employee e
+join works w on e.empno = w.empno
+join project p on w.projno = p.projno
+where w.hours_worked > (
+    select avg(hours_worked) 
+    from works
+);
+
+
+
+
+

@@ -1,0 +1,187 @@
+1. 전체 주문 통합 현황 뷰를 작성하시오
+(주문 + 고객 + 영업사원 정보를 한눈에 통합 조회 뷰)
+
+create view 통합_현황 as 
+select o.number,o.amount,c.name,c.city,c.industrytype,s.name,s.age
+from [Order] o
+join Salesperson on o.salesperson = s.name
+join Customer on o.custname = c.name;
+
+
+2. 영업사원별 총 주문 금액 및 건수 뷰를 작성하시오.
+(영업사원별 실적(주문 건수, 총 매출) 집계)
+
+CREATE VIEW 영업사원_실적_통계_View AS
+SELECT s.name AS 영업사원명,s.salary AS 기본급여,COUNT(o.number) AS 총주문건수,SUM(o.amount) AS 총매출액
+FROM Salesperson s
+LEFT JOIN "Order" o ON s.name = o.salesperson
+GROUP BY s.name, s.salary;
+
+
+3. 고객별 총 주문 금액 뷰를 작성하시오
+(고객별 누적 주문 횟수와 총 구매 금액 집계 포함된 뷰)
+
+create view 고객별_총_주문_금액  as
+select c.name,count(o.number),sum(o.amount)
+from Customer c
+join [Order] o on c.name = o.custname
+group by c.name;
+
+
+
+4. 도시별 주문 현황 뷰를 작성하시오
+(도시(city)별 총 주문 건수와 매출 집계 포함된 뷰)
+
+create view 도시별_주문_현황  as
+select c.city,sum(o.amount),count(o.number)
+from Customer c
+join [Order] o on c.name = o.custname
+group by c.city;
+
+
+5. 업종별 주문 통계 뷰를 작성하시오
+(산업 유형(industrytype)별 주문 건수 및 총 매출 비교 뷰)
+
+create view 업종별_주문_통계  as
+select c.industrytype,count(o.number),sum(o.amount)
+from Customer c
+join [Order] o on c.name = o.custname
+group by c.industrytype;
+
+
+
+
+
+6. 고액 주문 뷰 (amount 상위)를 작성하시오
+(주문 금액이 평균 이상인 고액 주문만 조회하는 뷰)
+
+create view 고액_주문  as
+select amount
+from [Order]
+where amount >= (
+select avg(o.amount)
+from [order]);
+
+
+7. 주문 실적 없는 영업사원 뷰를 작성하시오
+(한 건도 주문을 처리하지 않은 영업사원 조회 뷰)
+
+CREATE VIEW 주문_실적_없는_영업사원 AS
+SELECT name
+FROM Salesperson
+WHERE name NOT IN (
+    SELECT DISTINCT salesperson
+    FROM `Order`);
+
+8. 주문 이력 없는 고객 뷰를 작성하시오
+(등록은 되어 있지만 한 번도 주문하지 않은 고객 조회 뷰)
+
+create view 주문_이력_없는_고객 as
+select name
+from customer
+where name not in (
+    select distinct custname
+    from `order`
+);
+
+9. 영업사원 급여 등급 뷰를 작성하시오
+(급여 구간별로 영업사원을 분류하는 뷰)
+
+create view 영업사원_급여_등급 as
+select name, salary,case 
+        when salary >= 5000 then '고급'
+        when salary >= 3000 then '중급'
+        else '초급'
+    end as salary_grade
+from salesperson;
+
+10. 영업사원별 담당 고객 목록 뷰를 작성하시오
+(각 영업사원이 주문을 처리한 고객 목록(중복 제거) 생성 뷰)
+
+
+create view 영업사원별_담당_고객_목록 as
+select distinct salesperson, custname
+from `order`
+group by salesperson, custname;
+
+
+
+
+
+11. 최고 실적 영업사원 뷰를 작성하시오
+(총 주문 금액이 가장 높은 영업사원 조회하는 뷰)
+
+create view 최고_실적_영업사원 as
+select salesperson
+from `order`
+group by salesperson
+having sum(amount) = (
+    select max(total_amount)
+    from (
+        select sum(amount) as total_amount
+        from `order`
+        group by salesperson
+    ) as summary
+);
+
+
+
+12. 도시별 영업사원 활동 현황 뷰를 작성하시오
+(어느 도시의 고객에게 얼마나 판매했는지 영업사원 기준 집계 뷰)
+
+create view 도시별_영업사원_활동_현황 as
+select 
+    o.salesperson as 영업사원, 
+    c.city as 고객_도시, 
+    sum(o.amount) as 총_판매금액,
+    count(o.number) as 판매_건수
+from `order` o
+join customer c on o.custname = c.name
+group by o.salesperson, c.city;
+
+
+
+
+13. 영업사원 급여 대비 매출 효율 뷰를 작성하시오 (영업사원 급여 대비 총 매출 비율로 효율성 측정 뷰)
+
+create view 영업사원_매출_효율 as
+select 
+    s.name, 
+    s.salary, 
+    sum(o.amount)
+    (sum(o.amount) / s.salary) 
+from salesperson s
+join `order` o on s.name = o.salesperson
+group by s.name, s.salary;
+
+
+
+
+14. 업종별 담당 영업사원 현황 뷰를 작성하시오 (산업 유형별로 어떤 영업사원이 활동하는지 파악)
+
+create view 업종별_담당_영업사원_현황 as
+select distinct
+    c.industrytype as 업종, 
+    o.salesperson as 담당_영업사원
+from customer c
+join `order` o on c.name = o.custname;
+
+
+
+15. 주문 금액 구간별 분류 뷰를 작성하시오
+(주문을 금액 구간으로 나누어 분류 및 통계 제공 뷰)
+
+create view 주문_금액_구간_분류 as
+select 
+    number,
+    custname,
+    amount,
+    case 
+        when amount >= 800 then '고액 주문'
+        when amount >= 400 then '중액 주문'
+        else '소액 주문'
+    end as amount_grade
+from `order`;
+
+
+

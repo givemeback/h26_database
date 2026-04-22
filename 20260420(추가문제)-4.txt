@@ -1,0 +1,179 @@
+1. 전체 예약 통합 현황 뷰를 작성하시오
+(승객 + 여행사 + 항공편 정보를 한눈에 통합 조회 뷰)
+
+create view 전체_예약_통합_현황 as
+select 
+    p.pname as 승객명,
+    p.pgender as 성별,
+    a.aname as 여행사명,
+    f.fid as 항공편,
+    f.fdate as 날짜,
+    f.src as 출발지,
+    f.dest as 도착지
+from booking b
+join passenger p on b.pid = p.pid
+join agency a on b.aid = a.aid
+join flight f on b.fid = f.fid and b.fdate = f.fdate;
+
+2. 승객별 예약 내역 뷰를 작성하시오
+(각 승객이 예약한 항공편과 여행사 정보 조회 뷰)
+
+create view 승객별_예약_내역 as 
+select p.pname,b.fid,a.aname
+from passenger p
+join booking b on p.pid = b.pid
+join agency a on b.aid = a.aid;
+
+3. 여행사별 예약 건수 및 실적 뷰를 작성하시오
+(각 여행사의 총 예약 건수와 취급 항공편 수 집계 뷰)
+
+create view 여행사별_예약_건수_및_실적 as 
+
+
+4. 항공편별 예약 승객 수 뷰를 작성하시오
+(각 항공편의 예약된 승객 수와 출발·도착지 조회 뷰)
+
+create view 여행사별_예약_건수_및_실적 as
+select 
+    a.aname as 여행사명,
+    count(b.fid) as 총_예약_건수,
+    count(distinct b.fid) as 취급_항공편_수
+from agency a
+left join booking b on a.aid = b.aid
+group by a.aname;
+
+
+
+5. 출발지·도착지별 노선 통계 뷰를 작성하시오
+(노선(src → dest)별 운항 횟수와 총 예약 건수 집계 뷰)
+
+create view 노선별_통계 as
+select 
+    f.src as 출발지, 
+    f.dest as 도착지, 
+    count(distinct f.fid, f.fdate) as 운항_횟수,
+    count(b.pid) as 총_예약_건수
+from flight f
+left join booking b on f.fid = b.fid and f.fdate = b.fdate
+group by f.src, f.dest;
+
+
+6. 도시별 승객 예약 현황 뷰를 작성하시오
+(승객 거주 도시별 총 예약 건수 및 이용 현황 집계 뷰)
+
+create view 도시별_승객_예약_현황 as
+select 
+    p.pcity as 거주_도시,
+    count(b.pid) as 총_예약_건수,
+    count(distinct p.pid) as 예약한_승객_수
+from passenger p
+left join booking b on p.pid = b.pid
+group by p.pcity;
+
+
+7. 성별 이용 통계 뷰를 작성하시오
+(성별(pgender)에 따른 예약 건수와 이용 노선 수 비교 뷰)
+
+create view 성별_이용_통계 as
+select 
+    p.pgender as 성별,
+    count(b.pid) as 총_예약_건수,
+    count(distinct b.fid) as 이용_노선_수
+from passenger p
+join booking b on p.pid = b.pid
+group by p.pgender;
+
+
+
+8. 예약 이력 없는 승객 뷰를 작성하시오
+(한 번도 예약하지 않은 승객 조회 (비활성 승객 관리) 뷰)
+
+create view 예약_이력_없는_승객 as
+select p.pid, p.pname, p.pcity
+from passenger p
+left join booking b on p.pid = b.pid
+where b.pid is null;
+
+
+9. 예약 실적 없는 여행사 뷰를 작성하시오
+(한 건도 예약을 처리하지 않은 여행사 조회 뷰)
+
+create view 예약_실적_없는_여행사 as
+select aid, aname, acity
+from agency
+where aid not in (
+    select distinct aid
+    from booking
+);
+
+
+10. 승객별 이용 여행사 목록 뷰를 작성하시오
+(각 승객이 이용한 여행사 목록 (중복 제거) 뷰)
+
+create view 승객별_이용_여행사_목록 뷰 as 
+
+
+11. 동일 출발·도착지 왕복 노선 뷰를 작성하시오
+(왕복 운항이 가능한 노선 쌍(A→B, B→A) 조회 뷰)
+
+create view 승객별_이용_여행사_목록 as
+select distinct 
+    p.pname as 승객명, 
+    a.aname as 여행사명
+from booking b
+join passenger p on b.pid = p.pid
+join agency a on b.aid = a.aid;
+
+
+12. 여행사별 담당 승객 상세 뷰를 작성하시오
+(여행사별로 담당한 승객 정보와 이용 항공편 상세 조회 뷰)
+
+create view 여행사별_담당_승객_상세 as
+select 
+    a.aname as 여행사명,
+    p.pname as 승객명,
+    p.pcity as 승객거주지,
+    f.fid as 항공편번호,
+    f.src as 출발지,
+    f.dest as 도착지,
+    f.fdate as 운항날짜
+from agency a
+join booking b on a.aid = b.aid
+join passenger p on b.pid = p.pid
+join flight f on b.fid = f.fid and b.fdate = f.fdate;
+
+
+
+13. 날짜별 예약 및 항공편 현황 뷰를 작성하시오
+(날짜별 총 예약 건수와 운항 항공편 수 집계 뷰)
+
+create view 날짜별_예약_및_항공편_현황 as 
+
+
+14. 다중 항공편 이용 승객 뷰를 작성하시오
+(2개 이상의 항공편을 예약한 승객 조회 (자주 이용 고객) 뷰)
+
+create view 날짜별_예약_및_항공편_현황 as
+select 
+    f.fdate as 운항날짜,
+    count(distinct f.fid) as 운항_항공편_수,
+    count(b.pid) as 총_예약_건수
+from flight f
+left join booking b on f.fid = b.fid and f.fdate = b.fdate
+group by f.fdate;
+
+
+15. 승객-여행사 동일 도시 예약 뷰를 작성하시오
+(승객의 거주 도시와 여행사 위치가 같은 예약 조회 뷰)
+
+create view 승객_여행사_동일_도시_예약 as
+select 
+    p.pname as 승객명,
+    p.pcity as 승객도시,
+    a.aname as 여행사명,
+    a.acity as 여행사도시,
+    b.fid as 항공편번호
+from booking b
+join passenger p on b.pid = p.pid
+join agency a on b.aid = a.aid
+where p.pcity = a.acity;

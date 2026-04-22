@@ -1,0 +1,177 @@
+1. 전체 상영 정보 통합 뷰를 작성하시오.
+(극장 + 상영관 + 영화 정보를 한눈에 확인 가능하도록 작성)
+
+
+create view 전체 상영 정보 통합 뷰 as
+select 극장.극장번호, 극장.극장이름, 극장.위치,상영관.상영관번호, 상영관.영화제목, 상영관.가격, 상영관.좌석수
+from 극장 극장
+join 상영관 상영관 on 극장.극장번호 = 상영관.극장번호;
+
+
+
+2 .예약 전체 현황 뷰를 작성하시오
+(고객이 어떤 극장·상영관·영화를 예약했는지 통합 조회하도록 작성)
+
+CREATE VIEW 예약_전체_현황_View AS
+SELECT C.이름 AS 고객명, T.극장이름, S.상영관번호, S.영화제목, R.좌석번호, R.날짜
+FROM 고객 C
+JOIN 예약 R ON C.고객번호 = R.고객번호
+JOIN 상영관 S ON R.극장번호 = S.극장번호 AND R.상영관번호 = S.상영관번호
+JOIN 극장 T ON S.극장번호 = T.극장번호;
+
+
+3. 극장별 상영 영화 목록 뷰를 작성하시오
+(각 극장에서 상영 중인 영화와 가격, 좌석수 조회)
+
+CREATE VIEW 극장별_상영_영화_목록_View AS
+SELECT T.극장이름, T.위치, S.영화제목, S.가격, S.좌석수
+FROM 극장 T
+JOIN 상영관 S ON T.극장번호 = S.극장번호;
+
+
+
+
+4. 고객별 예약 내역 뷰를 작성하시오
+(고객별 예약한 영화 목록과 날짜, 금액 조회가능한 뷰)
+
+CREATE VIEW 고객별_예약_내역_View AS
+SELECT C.이름 AS 고객명, S.영화제목, R.날짜 AS 예약날짜, S.가격 AS 결제금액,R.좌석번호
+FROM 고객 C
+JOIN 예약 R ON C.고객번호 = R.고객번호
+JOIN 상영관 S ON R.극장번호 = S.극장번호 AND R.상영관번호 = S.상영관번호;
+
+
+5. 상영관별 예약 인원 및 잔여 좌석 뷰를 작성하시오
+(상영관의 총 좌석 대비 예약 현황과 잔여 좌석 계산)
+
+
+CREATE VIEW 상영관별_좌석_현황_View AS
+SELECT S.극장번호,T.극장이름,S.상영관번호, S.영화제목, S.좌석수 AS 총좌석수,COUNT(R.고객번호) AS 예약인원,(S.좌석수 - COUNT(R.고객번호)) AS 잔여좌석수
+FROM 상영관 S
+JOIN 극장 T ON S.극장번호 = T.극장번호
+LEFT JOIN 예약 R ON S.극장번호 = R.극장번호 AND S.상영관번호 = R.상영관번호
+GROUP BY S.극장번호, T.극장이름, S.상영관번호, S.영화제목, S.좌석수;
+
+
+
+6. 극장별 총 예약 수 및 매출 뷰를 작성하시오
+(극장별 총 예약 건수와 누적 매출 집계를 볼 수 있는 뷰)
+
+CREATE VIEW 극장별_실적_통계_View AS
+SELECT T.극장번호,T.극장이름,T.위치,COUNT(R.고객번호) AS 총예약건수,SUM(CASE WHEN R.고객번호 IS NOT NULL THEN S.가격 ELSE 0 END) AS 누적매출액
+FROM 극장 T
+LEFT JOIN 상영관 S ON T.극장번호 = S.극장번호
+LEFT JOIN 예약 R ON S.극장번호 = R.극장번호 AND S.상영관번호 = R.상영관번호
+GROUP BY T.극장번호, T.극장이름, T.위치;
+
+
+
+
+7. 영화별 예약 현황 뷰를 작성하시오
+(영화 제목별 총 예약 인원과 총 매출 집계 뷰)
+
+CREATE VIEW 영화별_흥행_현황_View AS
+SELECT S.영화제목, COUNT(R.고객번호) AS 총예약인원, SUM(CASE WHEN R.고객번호 IS NOT NULL THEN S.가격 ELSE 0 END) AS 총매출액
+FROM 상영관 S
+LEFT JOIN 예약 R ON S.극장번호 = R.극장번호 AND S.상영관번호 = R.상영관번호
+GROUP BY S.영화제목;
+
+
+
+8. 날짜별 예약 현황 뷰를 작성하시오
+(날짜별 예약 건수와 해당 날짜 매출 조회 가능한 뷰 작성)
+
+CREATE VIEW 날짜별_예약_현황_View AS
+SELECT R.날짜, COUNT(R.고객번호) AS 일별예약건수, SUM(S.가격) AS 일별매출액
+FROM 예약 R
+JOIN 상영관 S ON R.극장번호 = S.극장번호 AND R.상영관번호 = S.상영관번호
+GROUP BY R.날짜;
+
+
+9. 예약 이력이 없는 고객 뷰
+(한 번도 예약한 적 없는 고객 조회하는 뷰 작서)
+
+CREATE VIEW 미예약_고객_View AS
+SELECT C.고객번호, C.이름, C.주소
+FROM 고객 C
+LEFT JOIN 예약 R ON C.고객번호 = R.고객번호
+WHERE R.고객번호 IS NULL;
+
+
+
+10. 고객별 총 예약 횟수 및 결제 금액 뷰
+(고객의 예약 활동 통계) (충성 고객 분석용)
+
+CREATE VIEW 고객_활동_통계_View AS
+SELECT C.고객번호, C.이름, COUNT(R.고객번호) AS 총예약횟수, SUM(CASE WHEN R.고객번호 IS NOT NULL THEN S.가격 ELSE 0 END) AS 총결제금액
+FROM 고객 C
+LEFT JOIN 예약 R ON C.고객번호 = R.고객번호
+LEFT JOIN 상영관 S ON R.극장번호 = S.극장번호 AND R.상영관번호 = S.상영관번호
+GROUP BY C.고객번호, C.이름;
+
+
+
+
+11. 가격이 가장 비싼 상영관 뷰를 작성하시오
+(티켓 가격 기준 상위 상영관 목록 조회하는 뷰 작성)
+
+CREATE VIEW 프리미엄_상영관_View AS
+SELECT T.극장이름,S.상영관번호,S.영화제목,S.가격,S.좌석수
+FROM 상영관 S
+JOIN 극장 T ON S.극장번호 = T.극장번호
+WHERE S.가격 = (SELECT MAX(가격) FROM 상영관);
+
+
+
+12. 위치별 극장 및 상영 현황 뷰
+(지역(위치)별로 운영 중인 극장과 상영 영화 수 집계하는 뷰 작성)
+
+CREATE VIEW 위치별_운영_현황_View AS
+SELECT 위치, COUNT(DISTINCT 극장번호) AS 극장수, COUNT(상영관번호) AS 총상영영화수
+FROM (SELECT T.위치, T.극장번호, S.상영관번호 
+FROM 극장 T
+LEFT JOIN 상영관 S ON T.극장번호 = S.극장번호
+) 
+GROUP BY 위치;
+
+
+
+
+13. 만석 상영관 뷰를 작성하시오
+(예약 좌석 수가 전체 좌석 수와 동일한 매진 상영관 조회)
+
+CREATE VIEW 만석상영관 AS
+SELECT S.극장번호, S.상영관번호, S.영화제목
+FROM 상영관 S
+WHERE S.좌석수 = (
+    SELECT COUNT(*)
+    FROM 예약 R
+    WHERE R.극장번호 = S.극장번호 
+      AND R.상영관번호 = S.상영관번호);
+
+
+
+
+
+14. 특정 날짜 예약 고객 상세 뷰를 작성하시오
+( 날짜별 예약 고객 정보와 관람 영화 상세 조회)
+
+CREATE VIEW 예약고객상세 AS
+SELECT R.날짜, C.이름 AS 고객명, C.주소, S.영화제목,S.상영관번호, R.좌석번호, S.가격
+FROM 예약 R
+JOIN 고객 C ON R.고객번호 = C.고객번호
+JOIN 상영관 S ON R.극장번호 = S.극장번호 AND R.상영관번호 = S.상영관번호;
+
+
+
+15. 예약 없는 상영관 뷰
+개설되었지만 예약이 한 건도 없는 상영관 조회
+
+CREATE VIEW 예약없는상영관 AS
+SELECT 극장번호, 상영관번호, 영화제목
+FROM 상영관
+WHERE (극장번호, 상영관번호) NOT IN (
+    SELECT DISTINCT 극장번호, 상영관번호
+    FROM 예약);
+
+

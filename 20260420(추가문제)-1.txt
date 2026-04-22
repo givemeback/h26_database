@@ -1,0 +1,141 @@
+학생s(학번, 이름, 전공, 학년)
+수강g(과목코드, 학번, 수강학기, 성적)
+과목k(과목코드, 과목이름, 강의실, 요일, 담당교수)
+
+
+(1)학생 수강 전체 현황 뷰를 작성하시오.
+(학생정보+수강 과목+성적을 한 분에 확인가능하도록 작성)
+
+CREATE VIEW v_student_report AS
+SELECT s.학번, s.이름, s.전공, s.학년,k.과목이름,k.담당교수,g.수강학기,g.성적
+FROM 학생 s
+JOIN 수강 g ON s.학번 = g.학번   
+JOIN 과목 k ON g.과목코드 = k.과목코드;
+
+
+
+(2)각 학생별 평균 성적 뷰를 작성하시오.
+(각 학생의 전체 수강 과목 평균 성적 계산 뷰)
+
+CREATE VIEW v_student_avg_score AS
+SELECT s.이름 AVG(g.성적)
+FROM 학생 s
+JOIN 수강 g ON s.학번 = g.학번  
+Group by s.학번, s.이름;
+
+
+
+(3)과목별 수강 인원 및 평균 성적 뷰를 작성하시오.
+(각 과목의 수강 인원과 평균, 최고,최저 성적 통계 뷰)
+
+CREATE VIEW v_subject_stats AS
+SELECT k.과목코드, k.과목이름, COUNT(g.학번),AVG(g.성적),MAX(g.성적),MIN(g.성적)  
+FROM 과목 k
+JOIN 수강 g ON k.과목코드 = g.과목코드
+GROUP BY k.과목코드, k.과목이름;
+
+
+
+(4)성적 우수 학생 뷰를 작성하시오.(평균 90점 이상)
+(평균 성적이 90점 이상이 우수 학생만 조회하는 뷰)
+
+CREATE VIEW v_honor_student AS
+SELECT *
+FROM v_student_avg_score
+WHERE 평균성적 >= 90;
+
+
+
+
+
+(5)전공 별 수강 통계 뷰를 작성하시오.
+전공별 총 수강 건수와 전공 평균 성적 비교 뷰)
+
+CREATE VIEW v_major_stats AS
+SELECT 
+    s.전공, 
+    COUNT(g.학번) AS 총_수강_건수,      
+    AVG(g.성적) AS 전공_평균_성적       
+FROM 학생 s
+JOIN 수강 g ON s.학번 = g.학번         
+GROUP BY s.전공;
+
+
+(6)학기별 수강 현황 뷰를 작성하시오.
+
+CREATE VIEW v_semester_stats AS
+SELECT 
+    수강학기, 
+    COUNT(DISTINCT 과목코드) AS 개설과목수,  
+    COUNT(학번) AS 총_수강인원,            
+    AVG(성적) AS 학기_평균성적             
+FROM 수강
+GROUP BY 수강학기;
+
+
+
+(7)미수강 학생 뷰를 작성하시오.
+
+
+CREATE VIEW 미수강학생_뷰 AS
+SELECT 학번, 이름, 전공, 학년
+FROM 학생
+WHERE 학번 NOT IN (SELECT 학번 FROM 수강);
+
+
+
+
+
+
+(8)담당 교수별 강의 및 수강 현황 뷰를 작성하시오.
+(과목별 담당 과목 수와 총 수강 학생수를 집계하는 뷰)
+
+
+CREATE VIEW 교수별_강의현황_뷰 AS
+SELECT 
+    과목.담당교수, 
+    COUNT(DISTINCT 과목.과목코드) AS 담당과목수, 
+    COUNT(수강.학번) AS 총수강학생수
+FROM 과목
+LEFT JOIN 수강 ON 과목.과목코드 = 수강.과목코드
+GROUP BY 과목.담당교수;
+
+
+
+
+
+
+
+(9)학년별 수강 과목 수 및 평균 성적 뷰를 작성하시오.
+(학년에 따른 수강 부담과 성적 추이를 파악하는 뷰 작성)
+
+
+CREATE VIEW 학년별_수강통계_뷰 AS
+SELECT 
+    S.학년, 
+    COUNT(E.과목코드) AS 총수강과목수, 
+    AVG(E.성적) AS 평균성적
+FROM 학생 S
+JOIN 수강 E ON S.학번 = E.학번
+GROUP BY S.학년;
+
+
+
+
+
+
+(10)성적 미입력(NULL) 수강 내역 뷰를 작성하시오.
+(성적이 아직 입력되지 않은 수강 내역 관리용이다.)
+
+
+CREATE VIEW 성적미입력_현황_뷰 AS
+SELECT 
+    S.이름 AS 학생명, 
+    C.과목이름, 
+    C.담당교수,
+    E.수강학기
+FROM 수강 E
+JOIN 학생 S ON E.학번 = S.학번
+JOIN 과목 C ON E.과목코드 = C.과목코드
+WHERE E.성적 IS NULL;
+
